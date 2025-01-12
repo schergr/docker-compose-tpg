@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
   evaluation_interval: 5s
 
 rule_files:
@@ -7,13 +7,22 @@ rule_files:
   #   # - "second.rules"
   #
 scrape_configs:
+  - job_name: 'stub'  # This is a default value, it is mandatory.
+    file_sd_configs:
+      - files:
+        - /etc/prometheus/targets/*.json
   - job_name: telegraf
     metrics_path: /metrics
     static_configs:
       - targets:
           - telegraf:9126
-  - job_name: json_exporter
-    metrics_path: /metrics
+#  Prometheus scrape_configs entry
+  - job_name: "hass"
+    scrape_interval: 60s
+    metrics_path: /api/prometheus
+    # Long-Lived Access Token
+    authorization:
+      credentials: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyMDU5NDg4OWIxZjM0MTk4YTQ1YzViZDZiMWQyOTI5MCIsImlhdCI6MTczNTU5MzAyNSwiZXhwIjoyMDUwOTUzMDI1fQ.JUi2MW2g3rhHbCWVg6oJ8KxxH53FLi5EYXdRhrJgT1s"
+    scheme: http
     static_configs:
-      - targets:
-          - json-metric-exporter:5000
+      - targets: ['192.168.4.183:8123']
