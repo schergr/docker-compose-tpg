@@ -14,6 +14,14 @@ services:
     restart: always
     container_name: telegraf
     hostname: telegraf
+    labels:
+      - homepage.group=Monitoring & Observability
+      - homepage.name=telegraf
+      - homepage.href=http://dxp4800plus-342f.tail576f6.ts.net:9126
+      - homepage.description=9126:9126
+      - homepage.server=my-docker
+      - homepage.container=telegraf
+      - homepage.siteMonitor=http://telegraf:9126
     networks:
       - monitoring-network
     volumes:
@@ -40,37 +48,40 @@ services:
       - /volume3/docker-compose/monitoringobservability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - /volume3/docker-compose/monitoringobservability/prometheus/targets/prometheus.json:/etc/prometheus/targets/prometheus.json
       - /volume3/docker-compose/monitoringobservability/prometheus/targets/grafana.json:/etc/prometheus/targets/grafana.json
+    labels:
+      - homepage.group=Monitoring & Observability
+      - homepage.name=prometheus
+      - homepage.href=http://dxp4800plus-342f.tail576f6.ts.net:9090
+      - homepage.description=9090:9090
+      - homepage.server=my-docker
+      - homepage.container=prometheus
+      - homepage.siteMonitor=http://prometheus:9090
+      - homepage.widget.type=prometheus
+      - homepage.widget.url=http://prometheus:9090
   grafana:
     image: docker.io/grafana/grafana:latest
     container_name: grafana
     hostname: grafana
     networks:
-
       - monitoring-network
     restart: always
     depends_on:
       - prometheus
     ports:
       - 3001:3000
-    # entrypoint:
-    #   - sh
-    #   - -euc
-    #   - |
-    #     mkdir -p /etc/grafana/provisioning/datasources
-    #     cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-    #     apiVersion: 1
-    #     datasources:
-    #     - name: Loki
-    #       type: loki
-    #       access: proxy 
-    #       orgId: 1
-    #       url: http://loki:3100
-    #       basicAuth: false
-    #       isDefault: true
-    #       version: 1
-    #       editable: false
-    #     EOF
-    #     /run.sh
+    labels:
+      - homepage.group=Monitoring & Observability
+      - homepage.name=grafana
+      - homepage.href=http://dxp4800plus-342f.tail576f6.ts.net:3001
+      - homepage.description=3001:3000
+      - homepage.server=my-docker
+      - homepage.container=grafana
+      - homepage.siteMonitor=http://grafana:3000
+      - homepage.widget.type=grafana
+      - homepage.widget.url=http://grafana:3000
+      - homepage.widget.fields=["dashboards", "datasources", "totalalerts", "alertstriggered"]
+      - homepage.widget.username=admin
+      - homepage.widget.password=Zachchelsea1986!
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -87,6 +98,14 @@ services:
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/local-config.yaml
+    labels:
+      - homepage.group=Monitoring & Observability
+      - homepage.name=loki
+      - homepage.href=http://dxp4800plus-342f.tail576f6.ts.net:3100
+      - homepage.description=3100:3100
+      - homepage.server=my-docker
+      - homepage.container=loki
+      - homepage.siteMonitor=http://loki:3100
     networks:
       - monitoring-network
   
@@ -104,6 +123,11 @@ services:
     container_name: watchtower
     networks:
       - monitoring-network
+    labels:
+      - homepage.group=Container Management
+      - homepage.name=watchtower
+      - homepage.server=my-docker
+      - homepage.container=watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 300
@@ -114,6 +138,11 @@ services:
     environment:
       TZ: America/New_York
       DOZZLE_ENABLE_ACTIONS: true
+    labels:
+      - homepage.group=Container Management
+      - homepage.name=Dozzle
+      - homepage.server=my-docker
+      - homepage.container=dozzle
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -129,17 +158,22 @@ services:
     restart: unless-stopped
     networks:
       - monitoring-network
+    labels:
+      - homepage.group=Container Management
+      - homepage.name=Autoheal
+      - homepage.server=my-docker
+      - homepage.container=autoheal
     environment:
       AUTOHEAL_CONTAINER_LABEL: all
 
   speedtest-tracker:
     image: ghcr.io/linuxserver/speedtest-tracker:latest
-    container_name: SpeedTest-TRACKER
+    container_name: speedtest-tracker
     healthcheck:
      test: curl -f http://localhost:80/ || exit 1
     environment:
-       PUID: 0
-       PGID: 0
+       PUID: 1
+       PGID: 1
        APP_TIMEZONE: America/New_York
        DISPLAY_TIMEZONE: America/New_York
        APP_KEY: base64:Mk3oIhBicQx5NuTYpKcqNSRt4ANv+3nikg+z9yzWYrI= #docker exec speedtest-tracker php /app/www/artisan key:generate --show
@@ -153,6 +187,18 @@ services:
        SPEEDTEST_SERVERS: 51306, 12563, 53403, 31407, 9125
     volumes:
       - /volume3/docker-compose/speedtest/config:/config:rw
+    labels:
+      - homepage.group=Monitoring & Observability
+      - homepage.name=speedtest-tracker
+      - homepage.href=http://dxp4800plus-342f.tail576f6.ts.net:8999
+      - homepage.description=8999:80
+      - homepage.server=my-docker
+      - homepage.container=speedtest-tracker
+      - homepage.siteMonitor=http://speedtest-tracker:80
+      - homepage.widget.type=speedtest
+      - homepage.widget.url=http://speedtest-tracker:80
+      - homepage.widget.username=gregscher@gmail.com
+      - homepage.widget.password=Zachchelsea1986!
     ports:
       - 8999:80
     restart: on-failure:5
