@@ -9,6 +9,24 @@ networks:
     external: true
 
 services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    volumes:
+      - ./uptime-kuma-data:/app/data
+    ports:
+      - 3001:3001  # <Host Port>:<Container Port>
+    restart: always
+  dashdot:
+    image: mauricenino/dashdot:latest
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '8011:3001'
+    volumes:
+      - /:/mnt/host:ro
+    networks:
+      - monitoring-network
   telegraf:
     image: docker.io/telegraf:latest
     restart: always
@@ -117,10 +135,11 @@ services:
     command: -config.file=/etc/promtail/config.yml
     networks:
       - monitoring-network
-  
+
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
+    restart: always
     networks:
       - monitoring-network
     labels:
@@ -128,10 +147,14 @@ services:
       - homepage.name=watchtower
       - homepage.server=my-docker
       - homepage.container=watchtower
+    environment:
+      - WATCHTOWER_DEBUG=false
+      - WATCHTOWER_LOG_FORMAT=Pretty
+      - WATCHTOWER_POLL_INTERVAL=30
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
     command: --interval 300
-  
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
